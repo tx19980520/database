@@ -86,6 +86,7 @@ pair<int, string> DataBase::FindOneInFile(int id, int pos)
 	check.read(reinterpret_cast<char *>(&len), sizeof(len));
 	tmp = new char[len + 1];
 	check.read(tmp, len + 1);
+	tmp[len] = '\0';
 	string result = tmp;
 	return make_pair(id, result);
 }
@@ -119,14 +120,14 @@ void DataBase::FlushCheck(bool force)
 
 }
 
-void DataBase::Print(pair<int, int> data)
+void DataBase::Print(pair<int, string> data)
 {
-	cout << "   key          value";
-	cout << "-------------------------";
-	cout << data.first << "          " << data.second;
+	cout << "   key          value" << endl;
+	cout << "-------------------------" << endl;
+	cout << "   " << data.first << "          " << data.second << endl;
 }
 
-void DataBase::Print(vector<pair<int, int> > data)
+void DataBase::Print(vector<pair<int, string> > data)
 {
 	cout << "   key          value";
 	cout << "-------------------------";
@@ -155,7 +156,7 @@ void DataBase::Dump()
 
 void DataBase::Init()
 {
-	fstream db("db.default", ios::in | ios::out);
+	fstream db("C:\\Users\\ty020\\Desktop\\db\\database\\db\\Release\\db.default", ios::in | ios::out);
 	db.seekg(0, db.end);
 	int length = db.tellg();
 	db.seekg(0);

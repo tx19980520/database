@@ -940,7 +940,7 @@ namespace UnitTest
 			{
 				db->InsertOne(i, "fuck" + to_string(i));
 			}
-			for (int i = 0; i  <= 0; ++i)
+			for (int i = 0; i  < 10000; ++i)
 			{
 				db->RemoveOne(i);
 			}

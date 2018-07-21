@@ -426,7 +426,8 @@ int MiddleNode::FindKey(int id)
 
 int MiddleNode::FindOffset(int off)
 {
-	int low = 0, high = size, middle = 0;
+
+	int low = 0, high = size + 1, middle = 0;
 	while (low < high) {
 		middle = (low + high) / 2;
 		if (off == offset[middle]) {

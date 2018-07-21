@@ -16,8 +16,8 @@
 class DataBase{
 public:
 	/* save the current state to the file */
-	static void Print(pair<int, int>);
-	static void Print(vector<pair<int, int> >);
+	static void Print(pair<int, string>);
+	static void Print(vector<pair<int, string> >);
 	static void Dump();
 	static void Init();
 	static map<string, string> DataBaseManager;
