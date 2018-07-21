@@ -37,12 +37,12 @@ public:
 	int LeftSibling;
 	NODE_TYPE type;
 	TreeNode() {};
-	virtual void Merge(fstream& fs) = 0;
-	virtual void Remove(int, fstream&, int site) = 0;
-	virtual void Insert(int, int, int, fstream&) = 0;
+	virtual void Merge(fstream& fs, int& root) = 0;
+	virtual void Remove(int, fstream&, int site, int& root) = 0;
+	virtual void Insert(int, int, int, fstream&, int& tail, int& root) = 0;
 	virtual void Modify(int, int, int, fstream&) = 0;
 	virtual int Find(int) = 0;
-	virtual void Split(SplitData, fstream&) = 0;
+	virtual void Split(SplitData, fstream&, int& tail, int& root) = 0;
 	virtual int Borrow(fstream& fs, int pos) = 0;
 	virtual void NodeWrite(fstream& fs, int pos) = 0;
 	NODE_TYPE GetType() { return type; }
@@ -67,12 +67,12 @@ public:
 	int FindSuit(int id);
 	int GetSize() const { return size; };
 	int Borrow(fstream& fs, int pos);
-	void Merge(fstream& fs);
+	void Merge(fstream& fs, int& root);
 	int Find(int);
-	void Insert(int, int, int, fstream&);
-	void Remove(int, fstream&, int site);
+	void Insert(int, int, int, fstream&, int& tail, int& root);
+	void Remove(int, fstream&, int site, int& root);
 	void Modify(int, int, int, fstream&);
-	void Split(SplitData, fstream&);
+	void Split(SplitData, fstream&, int& tail, int& root);
 	int GetSize() { return size; }
 	int FindOffset(int offset);
 	int FindKey(int id);
@@ -106,12 +106,12 @@ public:
 	LeafNode(fstream& fs, int pos);
 	LeafNode(vector<LeafData>, int pointer, int parent, int lb, int rb);
 	int Borrow(fstream& fs, int pos);
-	void Merge(fstream& fs);
+	void Merge(fstream& fs, int& root);
 	int Find(int);
-	void Insert(int, int, int, fstream&);
-	void Remove(int, fstream&, int site);
+	void Insert(int, int, int, fstream&, int& tail, int& root);
+	void Remove(int, fstream&, int site, int& root);
 	void Modify(int, int, int, fstream&);
-	void Split(SplitData, fstream&);
+	void Split(SplitData, fstream&, int& tail, int& root);
 	/* extra function */
 	int GetSize() { return size; }
 
@@ -129,6 +129,7 @@ private:
 	fstream fs;
 	int root;
 	LeafNode* FindCore(int id);
+	int tail;
 public:
 	BplusTree(const string& path);
 	~BplusTree();

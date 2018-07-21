@@ -114,7 +114,7 @@ int MiddleNode::Borrow(fstream& fs, int pos)
 	return 0;
 }
 
-void MiddleNode::Merge(fstream& fs)
+void MiddleNode::Merge(fstream& fs, int& root)
 {
 	// default LeftSibling first
 	if (this->LeftSibling != 0)
@@ -154,7 +154,7 @@ void MiddleNode::Merge(fstream& fs)
 		left.RightSibling = RightSibling;
 		left.NodeWrite(fs, this->LeftSibling);
 		fs.seekg(this->parent);
-		parent.Remove(parent.keys[Down], fs, -1);
+		parent.Remove(parent.keys[Down], fs, -1, root);
 		// refresh the parent node, it must have parent
 	}
 	else {
@@ -193,7 +193,7 @@ void MiddleNode::Merge(fstream& fs)
 		right.NodeWrite(fs, this->RightSibling);
 		fs.seekg(this->parent);
 		// refresh the parent node, it must have parent
-		parent.Remove(parent.keys[Down], fs, 1);
+		parent.Remove(parent.keys[Down], fs, 1, root);
 	}
 
 }
@@ -217,7 +217,7 @@ int MiddleNode::Find(int id)
 	return low <= size - 1 ? offset[low] : offset[size] ;
 }
 
-void MiddleNode::Insert(int middle ,int l, int r, fstream& fs)
+void MiddleNode::Insert(int middle ,int l, int r, fstream& fs, int& tail, int& root)
 {
 	// insert the new node
 	bool done = false;
@@ -275,7 +275,7 @@ void MiddleNode::Insert(int middle ,int l, int r, fstream& fs)
 	*/
 }
 
-void MiddleNode::Remove(int id, fstream& fs, int site = 0)
+void MiddleNode::Remove(int id, fstream& fs, int site, int& root)
 {
 	int pos = FindKey(id);
 	keys.erase(pos + keys.begin());
@@ -308,16 +308,15 @@ void MiddleNode::Remove(int id, fstream& fs, int site = 0)
 				LeafNode NewNode(fs, (int)fs.tellg() - 4);
 				NewNode.parent = 0;
 				NewNode.NodeWrite(fs, offset[0]);
-				fs.seekp(0);
-				fs.write(reinterpret_cast<char *>(&offset[0]), sizeof(int));
+				// root refresh in file, we can refresh in memory
+				root = offset[0];
 				break;
 			}
 			case 0: {
 				MiddleNode NewNode(fs, (int)fs.tellg() - 4);
 				NewNode.parent = 0;
 				NewNode.NodeWrite(fs, offset[0]);
-				fs.seekp(0);
-				fs.write(reinterpret_cast<char *>(&offset[0]), sizeof(int));
+				root = offset[0];
 				break;
 			}
 		}
@@ -338,7 +337,7 @@ void MiddleNode::Remove(int id, fstream& fs, int site = 0)
 		int result = this->Borrow(fs, seek);
 		if (!result)// can't borrow, need merge
 		{
-			this->Merge(fs);
+			this->Merge(fs, root);
 		}
 	}
 }
@@ -348,10 +347,10 @@ void MiddleNode::Modify(int id, int offset, int len, fstream&)
 	
 }
 
-void MiddleNode::Split(SplitData sp, fstream& fs)
+void MiddleNode::Split(SplitData sp, fstream& fs, int& tail, int& root)
 {
 	// need to add height
-	this->Insert(sp.middle, sp.LeftOffset, sp.RightOffset, fs);
+	this->Insert(sp.middle, sp.LeftOffset, sp.RightOffset, fs, tail, root);
 	if (size > M)// overflow
 	{
 		// slice the array
@@ -368,8 +367,8 @@ void MiddleNode::Split(SplitData sp, fstream& fs)
 		int ChildType;
 		// record now fs pos
 		int now = fs.tellg();
-		fs.seekg(0, fs.end);
-		int pos = fs.tellg();
+		int pos = tail;
+		tail += 512;
 		fs.seekg(NewOffset[0]);
 		fs.read(reinterpret_cast<char *>(&ChildType), sizeof(int));
 		switch (ChildType)
@@ -417,8 +416,8 @@ void MiddleNode::Split(SplitData sp, fstream& fs)
 		// right
 		if (this->parent == 0)
 		{
-			fs.seekg(0, fs.end);
-			int NewPos = fs.tellg();
+			int NewPos = tail;
+			tail += 512;
 			vector<int> NewKey{ s.middle };
 			vector<int> NewOffset{ s.LeftOffset, s.RightOffset };
 			MiddleNode NewRoot(NewKey, NewOffset, 0, 0, 0);
@@ -431,12 +430,11 @@ void MiddleNode::Split(SplitData sp, fstream& fs)
 			rc.parent = NewPos;
 			rc.NodeWrite(fs, s.RightOffset);
 			// refresh the root
-			fs.seekp(0);
-			fs.write(reinterpret_cast<char *>(&NewPos), sizeof(int));
+			root = NewPos;
 		}
 		else {
 			MiddleNode parent(fs, this->parent);
-			parent.Split(s, fs);
+			parent.Split(s, fs, tail, root);
 		}
 	}
 	else {
@@ -600,7 +598,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	 return 0;
 }
 
- void LeafNode::Merge(fstream& fs)
+ void LeafNode::Merge(fstream& fs, int& root)
 {
 	 // default LeftSibling
 	 if (this->LeftSibling != 0)
@@ -616,7 +614,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 		 left.NodeWrite(fs, this->LeftSibling);
 		 // refresh the parent node
 		 fs.seekg(this->parent);
-		 parent.Remove(data[0].id, fs , -1);
+		 parent.Remove(data[0].id, fs , -1, root);
 	 }
 	 else{
 		 LeafNode right(fs, this->RightSibling);
@@ -629,7 +627,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 		 right.NodeWrite(fs, this->RightSibling);
 		 // refresh the parent node
 		 fs.seekg(this->parent);
-		 parent.Remove(r, fs, 1);
+		 parent.Remove(r, fs, 1, root);
 	 }
 
 }
@@ -658,7 +656,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 
 }
 
- void LeafNode::Insert(int id, int index, int size, fstream& fs)
+ void LeafNode::Insert(int id, int index, int size, fstream& fs,int& tail, int& root)
 {
 	 /*
 	 int len = data.size();
@@ -707,7 +705,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	 if (this->size > L)
 	 {
 		 SplitData s(0, 0, 0);
-		 this->Split(s, fs);
+		 this->Split(s, fs, tail, root);
 	 }
 	 else {
 		 // find and the tellg is the right place
@@ -715,7 +713,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	 }
 }
 
- void LeafNode::Remove(int pos, fstream& fs, int site)
+ void LeafNode::Remove(int pos, fstream& fs, int site, int& root)
 {
 	 if (pos != -1)
 	 {
@@ -731,7 +729,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 			 if (!result)
 			 {
 				 int now = fs.tellg();
-				 this->Merge(fs);// merge default left brother priority
+				 this->Merge(fs, root);// merge default left brother priority
 			 }
 		 }
 		 else {
@@ -751,7 +749,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	 this->NodeWrite(fs, u);
 }
 
- void LeafNode::Split(SplitData sd, fstream& fs)
+ void LeafNode::Split(SplitData sd, fstream& fs, int& tail, int& root)
 {
 	int half = size / 2;
 	vector<LeafData> tmp;
@@ -762,8 +760,8 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	int pointer = 0;
 	LeafNode NewNode(tmp, pointer, this->parent, (int)fs.tellg(), this->RightSibling);//int pointer, int parent, int lb, int rb
 	int now = fs.tellg();
-	fs.seekg(0, fs.end);
-	int pos = fs.tellg();
+	int pos = tail;
+	tail += 512;
 	// change the size 
 	this->size = half;
 	NewNode.NodeWrite(fs, pos);
@@ -773,8 +771,8 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	if (this->parent == 0)
 	{
 		// need to new a MiddleNode as parent
-		fs.seekg(0, fs.end);
-		int NewPos = fs.tellg();
+		int NewPos = tail;
+		tail += 512;
 		vector<int> NewKey{ NewNode.data[0].id };
 		vector<int> NewOffset{ now, pos };
 		MiddleNode NewRoot(NewKey, NewOffset, 0, 0, 0);
@@ -787,15 +785,14 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 		rc.NodeWrite(fs, pos);
 		NewRoot.NodeWrite(fs, NewPos);
 		// refresh the root
-		fs.seekp(0);
-		fs.write(reinterpret_cast<char *>(&NewPos), sizeof(int));
+		root = NewPos;
 		fs.flush();
 		return;
 	}
 	MiddleNode Parent(fs, this->parent);
 	// go to  the parent;
 	fs.seekg(this->parent);
-	Parent.Split(SplitData(NewNode.LeftSibling, pos, NewNode.data[0].id), fs);
+	Parent.Split(SplitData(NewNode.LeftSibling, pos, NewNode.data[0].id), fs, tail, root);
 }
 
 
@@ -806,11 +803,7 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 int BplusTree::Insert(int id, int index, int size)
 {
 	LeafNode* node = this->_Find(id);
-	node->Insert(id, index, size, fs);
-	fs.seekg(0);
-	fs.read(reinterpret_cast<char *>(&root), sizeof(int));
-	fs.seekg(root);
-	fs.seekp(root);
+	node->Insert(id, index, size, fs, tail, root);
 	return 1;
 }
 
@@ -820,7 +813,7 @@ pair<int, int> BplusTree::Remove(int id)
 	int pos = node->Find(id);
 	//  pos, size
 	pair<int, int> Raw = make_pair(node->data[pos].offset, node->data[pos].length);
-	node->Remove(pos, fs, 0);
+	node->Remove(pos, fs, 0, root);
 	return Raw;
 }
 
@@ -838,8 +831,6 @@ int BplusTree::Find(int id)
 // !important
 LeafNode* BplusTree::_Find(int id)
 {
-	fs.seekg(0);
-	fs.read(reinterpret_cast<char *>(&root), sizeof(int));
 	fs.seekg(root);
 	return FindCore(id);
 }
@@ -928,9 +919,13 @@ BplusTree::BplusTree(const string& path)
 		fs.seekg(0);
 		fs.seekp(0);
 		int r = 512;
+		// record root
+		fs.write(reinterpret_cast<char *>(&r), sizeof(r));
+		// record the tail
+		r *= 2;
 		fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 		r = 0;
-		for (int i = 0; i < 127; ++i)
+		for (int i = 0; i < 126; ++i)
 		{
 			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 		}
@@ -949,10 +944,14 @@ BplusTree::BplusTree(const string& path)
 	fs.seekg(0);
 	fs.seekp(0);
 	fs.read(reinterpret_cast<char *>(&root), sizeof(root));
+	fs.read(reinterpret_cast<char *>(&tail), sizeof(tail));
 	fs.seekg(root);
 }
 
 BplusTree::~BplusTree()
 {
+	fs.seekp(0);
+	fs.write(reinterpret_cast<char *>(&root), sizeof(root));
+	fs.write(reinterpret_cast<char *>(&tail), sizeof(tail));
 	this->fs.close();
 }

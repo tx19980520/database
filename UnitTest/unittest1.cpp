@@ -357,8 +357,10 @@ namespace UnitTest
 			fstream fs("FindSimple.idx", ios::in | ios::out | ios::binary);
 			int r = 512;
 			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
+			r *= 512;
+			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			r = 0;
-			for (int i = 0; i < 127; ++i)
+			for (int i = 0; i < 126; ++i)
 			{
 				fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			}
@@ -394,8 +396,10 @@ namespace UnitTest
 			fstream fs("FindSimple.idx", ios::in | ios::out | ios::binary);
 			int r = 512;
 			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
+			r *= 3;
+			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			r = 0;
-			for (int i = 0; i < 127; ++i)
+			for (int i = 0; i < 126; ++i)
 			{
 				fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			}
@@ -477,8 +481,10 @@ namespace UnitTest
 			fstream fs("remove.idx", ios::in | ios::out | ios::binary);
 			int r = 512;
 			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
+			r *= 2;
+			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			r = 0;
-			for (int i = 0; i < 127; ++i)
+			for (int i = 0; i < 126; ++i)
 			{
 				fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			}
@@ -623,8 +629,10 @@ namespace UnitTest
 			fstream fs("FindSimple.idx", ios::in | ios::out | ios::binary);
 			int r = 512;
 			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
+			r *= 2;
+			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			int zero = 0;
-			for (int i = 0; i < 127; ++i)
+			for (int i = 0; i < 126; ++i)
 			{
 				fs.write(reinterpret_cast<char *>(&zero), sizeof(zero));
 			}
@@ -658,8 +666,10 @@ namespace UnitTest
 			fstream fs("FindSimple.idx", ios::in | ios::out | ios::binary);
 			int r = 512;
 			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
+			r *= 4;
+			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			int zero = 0;
-			for (int i = 0; i < 127; ++i)
+			for (int i = 0; i < 126; ++i)
 			{
 				fs.write(reinterpret_cast<char *>(&zero), sizeof(zero));
 			}
@@ -738,8 +748,10 @@ namespace UnitTest
 			fstream fs("FindSimple.idx", ios::in | ios::out | ios::binary|ios::trunc);
 			int r = 512;
 			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
+			r *= 4;
+			fs.write(reinterpret_cast<char *>(&r), sizeof(r));
 			int zero = 0;
-			for (int i = 0; i < 127; ++i)
+			for (int i = 0; i < 126; ++i)
 			{
 				fs.write(reinterpret_cast<char *>(&zero), sizeof(zero));
 			}
