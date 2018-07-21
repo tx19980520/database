@@ -47,15 +47,19 @@ MiddleNode::MiddleNode(vector<int> keys, vector<int> offset, int parent, int lb,
 
 int MiddleNode::FindSuit(int id)
 {
-	for (int i = 0; i < size; ++i)
-	{
-		if (this->keys[i] > id)
-		{
-			return i - 1;
+	int low = 0;
+	int high = size - 1;
+	int mid;
+	while (low <= high) {
+		mid = low + ((high - low) >> 1);
+		if (id < keys[mid]) {
+			high = mid - 1;
+		}
+		else {
+			low = mid + 1;
 		}
 	}
-
-	return size - 1;
+	return low <= size - 1 ? low - 1 : size - 1;
 }
 
 int MiddleNode::Borrow(fstream& fs, int pos)
@@ -198,19 +202,53 @@ int MiddleNode::Find(int id)
 {
 	// return offset
 	// the size is the keys' size
-	for (int i = 0; i < size; ++i)
-	{
-		if (id < keys[i])
-			return offset[i];
+	int low = 0;
+	int high = size - 1;
+	int mid;
+	while (low <= high) {
+		mid = low + ((high - low) >> 1);
+		if (id < keys[mid]) {
+			high = mid - 1;
+		}
+		else {
+			low = mid + 1;
+		}
 	}
-	return offset[size];
+	return low <= size - 1 ? offset[low] : offset[size] ;
 }
 
 void MiddleNode::Insert(int middle ,int l, int r, fstream& fs)
 {
 	// insert the new node
 	bool done = false;
-	for (int i = 0; i < size; ++i)
+	int low = 0;
+	int high = size - 1;
+	int mid;
+	while (low <= high) {
+		mid = low + ((high - low) >> 1);
+		if (middle < keys[mid]) {
+			high = mid - 1;
+		}
+		else {
+			low = mid + 1;
+		}
+	}
+	if (low <= size - 1)
+	{
+		keys.insert(low + keys.begin(), middle);
+		if(low != 0)
+		offset.insert(low + offset.begin(), r);
+		else {
+			offset.insert(offset.begin(), r);
+			offset.insert(offset.begin(), l);
+		}
+	}
+	else {
+		keys.push_back(middle);
+		offset.push_back(r);
+		++size;
+	}
+	/*for (int i = 0; i < size; ++i)
 	{
 		if (middle < keys[i])
 		{
@@ -234,6 +272,7 @@ void MiddleNode::Insert(int middle ,int l, int r, fstream& fs)
 		offset.push_back(r);
 		++size;
 	}
+	*/
 }
 
 void MiddleNode::Remove(int id, fstream& fs, int site = 0)
@@ -600,16 +639,28 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	//data is order by the id;
 	// we do not use binary search first
 	int len = data.size();
-	for (int i = 0; i < len; ++i)
-	{
-		if (data[i].id == id)
-			return i;
+	int low = 0;
+	int high = len - 1;
+	int mid = 0;
+	while (low <= high) {
+		mid = low + ((high - low) >> 1);
+		if (id == data[mid].id) {
+			return mid;
+		}
+		else if (id < data[mid].id) {
+			high = mid - 1;
+		}
+		else {
+			low = mid + 1;
+		}
 	}
 	return -1;
+
 }
 
  void LeafNode::Insert(int id, int index, int size, fstream& fs)
 {
+	 /*
 	 int len = data.size();
 	 for (int i = 0; i < len; ++i)
 	 {
@@ -622,6 +673,34 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	 if (len == data.size())
 	 {
 		 data.push_back(LeafData(id, index, size));
+	 }
+	 */
+	 int low = 0;
+	 int high = (int)data.size() - 1;
+	 int mid = 0;
+	 while (low <= high) {
+		 mid = low + ((high - low) >> 1);
+		 if (id < data[mid].id) {
+			 high = mid - 1;
+		 }
+		 else {
+			 low = mid + 1;
+		 }
+	 }
+	 int result = 0;
+	 if (low <= size - 1)
+	 {
+		 result = low;
+	 }
+	 else {
+		 result = size;
+	 }
+	 if (result == size)
+	 {
+		 data.push_back(LeafData(id, index, size));
+	 }
+	 else {
+		 data.insert(data.begin() + result, LeafData(id, index, size));
 	 }
 	 this->size++;
 	 // check the size
@@ -724,7 +803,6 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 /*
 	class BplusTree
 */
-
 int BplusTree::Insert(int id, int index, int size)
 {
 	LeafNode* node = this->_Find(id);
