@@ -97,6 +97,7 @@ struct LeafData {
 */
 class LeafNode: TreeNode {
 	friend class MiddleNode;
+	friend class BplusTree;
 private:
 	void NodeWrite(fstream& fs, int pos);
 public:

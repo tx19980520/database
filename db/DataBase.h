@@ -15,6 +15,7 @@
 #define CACHE_LIMIT_SIZE 30;
 class DataBase{
 public:
+	BplusTree * index;
 	/* save the current state to the file */
 	static void Print(pair<int, string>);
 	static void Print(vector<pair<int, string> >);
@@ -46,7 +47,6 @@ private:
 	/* BM manages the fragements waiting for reusing */
 	BuddyManager *BM;
 	/* DataBaseManager store the path of the specific store */
-	BplusTree* index;
 	string dbname;
 	string dbpath;
 	int save();

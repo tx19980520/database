@@ -266,6 +266,10 @@ int DataBase::RemoveOne(int id)
 {
 	//   pos, size
 	pair<int, int>data = this->index->Remove(id);// return the pos
+	if (data.first == -1)
+	{
+		return 1;
+	}
 	this->BM->Free(data.first, data.second);
 	// refresh buffer and cache
 	this->buffer.Remove(id);
@@ -284,8 +288,7 @@ int DataBase::ModifyOne(int id, const string & data)
 	int pos = node->Find(id);
 	this->BM->Free(node->data[pos].offset, node->data[pos].length);
 	int NewPos = this->BM->Malloc(data.size() + 5);
-	node->data[pos].length = data.size() + 5;
-	node->data[pos].offset = NewPos;
+	this->index->Modify(id, NewPos, data.size() + 5);
 	cache.Update(make_pair(id, data));
 	buffer.Insert(id, NewPos, data);
 	return 1;

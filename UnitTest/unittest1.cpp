@@ -1,10 +1,14 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+#include <set>
 #include<map>
 #include<string>
+#include<cstdlib>
+#include<ctime>
 #include<iostream>
 #include <sstream>
 #include<fstream>
+#include <algorithm> 
 #include "string.h"
 #include "../db/Buffer.h"
 #include "../db/Buffer.cpp"
@@ -461,16 +465,22 @@ namespace UnitTest
 		{
 			fstream fs("FindSimple.idx", ios::in | ios::out | ios::binary | ios::trunc);
 			BplusTree tree("FindSimple.idx");
-			for (int i = 0; i < 100; ++i)
+			vector<int> keysss;
+			for (int i = 0; i < 100000;i += 17)
 			{
 				tree.Insert(i, 0, 0);
+				keysss.push_back(i);
 			}
 			LeafNode f(fs, 512);
 			LeafNode s(fs, 1024);
-			Assert::AreEqual(tree.GetRoot(), 1536);
-			for (int i = 0; i < 100; ++i)
+			for (int i = 0; i < 100000; i += 17)
 			{
-				tree.Remove(i);
+				srand((unsigned)time(NULL));
+				int f = rand() % (int)keysss.size();
+				int m = keysss[f];
+				tree.Remove(m);
+				keysss.erase(keysss.begin() + f);
+				Assert::AreEqual(tree.Find(m), -1);
 			}
 			Assert::AreEqual(1, 1);
 			fs.close();
@@ -550,24 +560,29 @@ namespace UnitTest
 		TEST_METHOD(BPLUSTREE_LEAF_MERGE_REMOVE)
 		{
 			fstream fs("remove.idx", ios::in | ios::out | ios::binary | ios::trunc);
-			fs.close();
 			BplusTree tree("remove.idx");
 			for (int i = 0; i < L + 1; ++i)
 			{
 				tree.Insert(i + 1, 0, 0);
 			}
+			LeafNode *ss = tree._Find(2);
+			delete ss;
 			// two leafNode and a MiddleNode
 			LeafNode *t = tree._Find(33);
 			Assert::AreEqual(t->GetSize(), 21);
 			delete t;
-			t = tree._Find(1);
-			Assert::AreEqual(t->GetSize(), 20);
-			delete t;
 			tree.Remove(33);
+			LeafNode sx3(fs, 512);
+			LeafNode xx3(fs, 1024);
+			MiddleNode sxv3(fs, 1536);
 			tree.Remove(35);
+			LeafNode sx5(fs, 512);
+			LeafNode xx5(fs, 1024);
+			MiddleNode sxv5(fs, 1536);
 			t = tree._Find(37);
 			Assert::AreEqual(t->GetSize(), 39);
 			delete t;
+			fs.close();
 		}
 
 		TEST_METHOD(BPLUSTREE_LEAF_BORROW_REMOVE)
@@ -873,11 +888,11 @@ namespace UnitTest
 
 		TEST_METHOD(DB_SIMPLE_TEST)
 		{
-			fstream vv("D:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
+			fstream vv("C:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
 			vv.close();
-			fstream sf("D:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
+			fstream sf("C:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
 			sf.close();
-			fstream sss("D:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
+			fstream sss("C:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
 			sss.close();
 			DataBase::Init();
 			DataBase *db = DataBase::GetDataBaseByName("darling");
@@ -886,9 +901,9 @@ namespace UnitTest
 			{
 				db->InsertOne(i, "fuck" + to_string(i));
 			}
-			BplusTree tree("D:\\DataBase\\darling\\darling.idx");
+			BplusTree tree("C:\\DataBase\\darling\\darling.idx");
 			LeafNode *f = tree._Find(1);
-			fstream fs("D:\\DataBase\\darling\\darling.idx", ios::in | ios::out | ios::binary);
+			fstream fs("C:\\DataBase\\darling\\darling.idx", ios::in | ios::out | ios::binary);
 			MiddleNode cc(fs, 1536);
 			LeafNode ss(fs, 1024);
 			for (int i = 0; i < 101; ++i)
@@ -910,11 +925,11 @@ namespace UnitTest
 
 		TEST_METHOD(DB_ANNOYING_TEST)
 		{
-			fstream vv("D:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
+			fstream vv("C:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
 			vv.close();
-			fstream sf("D:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
+			fstream sf("C:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
 			sf.close();
-			fstream sss("D:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
+			fstream sss("C:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
 			sss.close();
 			DataBase::Init();
 			DataBase *db = DataBase::GetDataBaseByName("darling");
@@ -939,11 +954,11 @@ namespace UnitTest
 
 		TEST_METHOD(DB_COMPLEX_TEST)
 		{
-			fstream vv("D:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
+			fstream vv("C:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
 			vv.close();
-			fstream sf("D:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
+			fstream sf("C:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
 			sf.close();
-			fstream sss("D:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
+			fstream sss("C:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
 			sss.close();
 			DataBase::Init();
 			DataBase *db = DataBase::GetDataBaseByName("darling");
@@ -952,13 +967,9 @@ namespace UnitTest
 			{
 				db->InsertOne(i, "fuck" + to_string(i));
 			}
-			for (int i = 0; i  < 10000; ++i)
-			{
-				db->RemoveOne(i);
-			}
 			for (int i = 0; i < 10000; ++i)
 			{
-				db->InsertOne(i, "shit" + to_string(i));
+				db->ModifyOne(i, "shit" + to_string(i));
 			}
 			for (int i = 0; i < 10000; ++i)
 			{
@@ -985,8 +996,69 @@ namespace UnitTest
 			Assert::AreEqual(_file.fail(), true);
 			_file.close();
 			DataBase::Dump();
-
 		}
 
+		TEST_METHOD(DB_STANDARD_TEST)
+		{
+			fstream vv("C:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
+			vv.close();
+			fstream sf("C:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
+			sf.close();
+			fstream sss("C:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
+			sss.close();
+			DataBase::Init();
+			DataBase *db = DataBase::GetDataBaseByName("darling");
+			Assert::AreNotEqual((int)db, NULL);
+			map<int, string> TestSet;
+			vector<int> keys;
+			vector<int>Re;
+			set<int> hadInsert;
+			for (int i = 0; i < 1000000; i+=5)
+			{
+				TestSet[i] = "fuck" + to_string(i);
+				keys.push_back(i);
+				db->InsertOne(i, "fuck" + to_string(i));
+			}
+			
+			for (int i = 0; i < 1000000; ++i)
+			{
+				srand((unsigned)time(NULL));
+				int f = rand() % (int)keys.size();
+				Assert::AreEqual(db->FindOne(keys[f]).second, TestSet[keys[f]]);
+				if (i % 37 == 0 && i != 0)
+				{
+					int f = rand() % (int)keys.size();
+					db->RemoveOne(keys[f]);
+					TestSet.erase(keys[f]);
+					Re.push_back(keys[f]);
+					int m = keys[f];
+					keys.erase(keys.begin() + f);
+					Assert::AreEqual(db->FindOne(m).first, -1);
+				}
+				if (i % 11 == 0 && i != 0)
+				{
+					set<int>::iterator itr;
+					int f = rand() % 10000000 + 10000000;
+					itr = hadInsert.find(f);
+					if (itr == hadInsert.end())
+					{
+						hadInsert.insert(f);
+						keys.push_back(f);
+						db->InsertOne(f, "fuck" + to_string(f));
+						TestSet[f] = "fuck" + to_string(f);
+						Assert::AreEqual(TestSet[f], db->FindOne(f).second);
+					}
+				}
+				if (i % 17 == 0 && i != 0)
+				{
+					int f = rand() % (int)keys.size();
+					TestSet[keys[f]] = "shit" + to_string(keys[f]);
+					db->ModifyOne(keys[f], TestSet[keys[f]]);
+					Assert::AreEqual(db->FindOne(keys[f]).second, TestSet[keys[f]]);
+				}
+			}
+		}
+
+
 	};
-}
+};
