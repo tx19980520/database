@@ -755,7 +755,6 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 			 }
 		 }
 	 }
-	 int fx = fs.tellg();
 	 return 0;
 }
 
@@ -985,6 +984,23 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 	Parent.Split(SplitData(NewNode.LeftSibling, pos, NewNode.data[0].id), fs, tail, root);
 }
 
+ int LeafNode::FindRange(int id)
+ {
+	 int low = 0;
+	 int high = size - 1;
+	 int mid = 0;
+	 while (low <= high) {
+		 mid = low + ((high - low) >> 1);
+		 if (id < data[mid].id) {
+			 high = mid - 1;
+		 }
+		 else {
+			 low = mid + 1;
+		 }
+	 }
+	 return low <= size - 1 ? low : -1;
+ }
+
 
 
 /*
@@ -1002,25 +1018,6 @@ pair<int, int> BplusTree::Remove(int id)
 	LeafNode* node = this->_Find(id);
 	int pos = node->Find(id);
 	//  pos, size
-	int tmppos = fs.tellg();
-	MiddleNode dark(fs, 1536);
-	if (id == 5300 || id == 5305)
-	{
-		MiddleNode fantsy(fs, 33280);
-		MiddleNode ssx(fs, 33792);
-		MiddleNode sxp(fs, 51200);
-		int i = 0;
-	}
-	fs.seekg(tmppos);
-	if (id == 8600)
-	{
-		int e = fs.tellg();
-		int i = 0;
-		MiddleNode pa(fs, 1536);
-		LeafNode sx(fs, 47104);
-		MiddleNode sxp(fs, 51200);
-		fs.seekg(e);
-	}
 	if (pos == -1)
 	{
 		MiddleNode ss(fs, node->parent);
@@ -1045,6 +1042,65 @@ int BplusTree::Find(int id)
 		return pos;
 	}
 	return l->data[pos].offset;
+}
+
+vector<pair<int, int> > BplusTree::FindMany(int low, int high)
+{
+	LeafNode* head =  this->_Find(low);
+	int pointer = head->RightSibling;
+	vector<pair<int, int> > result;
+	int pos = head->FindRange(low);
+	if (pos == 0)
+	{
+		pos = 0;
+	}
+	else if(pos > 0) {
+		if (head->data[pos - 1].id < low)
+		{
+			pos = pos;
+		}
+		else if(head->data[pos - 1].id == low){
+			pos = pos - 1;
+		}
+	}
+	int TailPos = head->FindRange(high);
+	if (TailPos == -1)// not arrive
+	{
+		for (int i = pos; i < head->size; ++i)
+		{
+			result.push_back(make_pair(head->data[i].id, head->data[i].offset));
+		}
+	}
+	else {// just in the same node
+		for (int i = pos; i < TailPos; ++i)
+		{
+			result.push_back(make_pair(head->data[i].id, head->data[i].offset));
+		}
+		return result;
+	}
+	// need to find in the right sibling
+	while (TailPos == -1)
+	{
+		LeafNode *tail = new LeafNode(fs, pointer);
+		TailPos = tail->FindRange(high);
+		if (TailPos == -1)
+		{
+			for (int i = 0; i < tail->size; ++i)
+			{
+				result.push_back(make_pair(tail->data[i].id, tail->data[i].offset));
+			}
+			pointer = tail->RightSibling;
+		}
+		else {
+			for (int i = 0; i < TailPos; ++i)
+			{
+				result.push_back(make_pair(tail->data[i].id, tail->data[i].offset));
+			}
+		}
+		delete tail;
+	}
+	delete head;
+	return result;
 }
 
 // !important

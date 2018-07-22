@@ -29,9 +29,7 @@ public:
 	int InsertOne(int, const string&); /* insert one data */
 	int InsertMany(vector<string>&); /* insert many data */
 	int RemoveOne(int);/* delete by key */
-	int RemoveMany(vector<int>);/* delete a data by primary key */
 	int ModifyOne(int, const string&); /* modify a data by primary key */
-	int ModifyMany(vector<pair<int, string> >&);/* modify data by primary key */
 	pair<int, string> FindOne(int);/* find a data by primary key */
 	vector<pair<int, string>> FindMany(int low, int high);/* find data by the rule of string */
 	void FlushCheck(bool force = false);/* check both buffer and cache flush */
@@ -53,7 +51,6 @@ private:
 
 
 	/*   FIND START   */
-	vector<int> FindManyInTree(vector<int>);/* find pointer in B+ */
 	pair<vector<pair<int, string> >,vector<int> > FindManyInCache(vector<int>);
 	/* find data in cache, many times some data still can't be find in the cache,so the 2ed parameter has output the ids can't find*/
 	vector<pair<int, string> > FindManyInFile(vector<pair<int,int> >);/* open the file */

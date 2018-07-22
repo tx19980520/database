@@ -115,6 +115,7 @@ public:
 	void Split(SplitData, fstream&, int& tail, int& root);
 	/* extra function */
 	int GetSize() { return size; }
+	int FindRange(int high);
 
 };
 
@@ -135,6 +136,7 @@ public:
 	BplusTree(const string& path);
 	~BplusTree();
 	int Find(int);
+	vector<pair<int, int> > FindMany(int low, int high);
 	LeafNode * _Find(int);/* Find a node by id */
 	int Insert(int id, int index, int size);/* insert a node */
 	pair<int, int> Remove(int id);/* delete a node */

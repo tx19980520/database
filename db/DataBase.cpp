@@ -1,11 +1,15 @@
 #include <iostream>
 #include <fstream>
+#include<algorithm>
 #include <direct.h>
 #include <cstdio>
 #include "DataBase.h"
 #include "BplusTree.h"
 using namespace std;
 
+bool judge(const pair<int, string> a, const pair<int, string> b) {
+	return a.first<b.first;
+}
 DataBase::DataBase(const string& name, const string& path)
 {
 	dbname = name;
@@ -35,10 +39,6 @@ int DataBase::FindOneInTree(int id)
 	return this->index->Find(id);
 }
 
-vector<int> DataBase::FindManyInTree(vector<int>)
-{
-	return vector<int>();
-}
 
 pair<vector<pair<int, string> >, vector<int> > DataBase::FindManyInCache(vector<int> IdArray)
 {
@@ -80,7 +80,7 @@ pair<int, string> DataBase::FindOneInFile(int id, int pos)
 {
 	/* I will change the temporary setting after the system work */
 	ifstream check(dbpath+"\\" + dbname + "\\"+dbname+".dat", ifstream::in | ifstream::binary);
-	check.seekg(pos, ios_base::beg);
+	check.seekg(pos);
 	char *tmp;
 	int len;
 	check.read(reinterpret_cast<char *>(&len), sizeof(len));
@@ -107,7 +107,27 @@ pair<int, string> DataBase::FindOne(int id)
 
 vector<pair<int, string>> DataBase::FindMany(int low, int high)
 {
-	return vector<pair<int, string>>();
+	vector<pair<int, int> > offsets = this->index->FindMany(low, high);
+	// first find in the cache
+	vector<pair<int, string> >result;
+	vector<pair<int, int>>infile;
+	for (int i = 0; i < offsets.size(); ++i)
+	{
+		pair<int, string>slice = this->cache.Find(offsets[i].first);
+		if (slice.second != "")
+		{
+			result.push_back(slice);
+		}
+		else {
+			infile.push_back(offsets[i]);
+		}
+	}
+	vector<pair<int, string> >FileResult;
+	FileResult = this->FindManyInFile(infile);
+	result.insert(result.begin(), FileResult.begin(), FileResult.end());
+	sort(result.begin(), result.end(), judge);
+	return result;
+	
 }
 
 void DataBase::close(DataBase* db)
@@ -250,7 +270,7 @@ DataBase * DataBase::GetDataBaseByName(const string &dbname)
 
 int DataBase::InsertOne(int id, const string &data)
 {
-	int pos = this->BM->Malloc(sizeof(data.c_str()) + 5);// add int + '/0'
+	int pos = this->BM->Malloc(data.size() + 5);// add int + '/0'
 	// refresh the buffer and cache
 	buffer.Insert(id, pos, data);
 	cache.Update(make_pair(id, data));
@@ -277,11 +297,6 @@ int DataBase::RemoveOne(int id)
 	return 1;
 }
 
-int DataBase::RemoveMany(vector<int>)
-{
-	return 0;
-}
-
 int DataBase::ModifyOne(int id, const string & data)
 {	
 	LeafNode* node = this->index->_Find(id);
@@ -294,9 +309,5 @@ int DataBase::ModifyOne(int id, const string & data)
 	return 1;
 }
 
-int DataBase::ModifyMany(vector<pair<int, string>>&)
-{
-	return 0;
-}
 
 map<string, string> DataBase::DataBaseManager;

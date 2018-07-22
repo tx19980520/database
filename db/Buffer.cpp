@@ -20,10 +20,14 @@ void Buffer::Wrtite(const string & filepath)
 	map<int, pair<int, string> >::iterator itr;
 	for (itr = this->BufferSpace.begin(); itr != this->BufferSpace.end(); ++itr)
 	{
-		file.seekp(ios_base::beg + itr->second.first);// change the right position
+		file.seekp(itr->second.first);// change the right position
 		int size = itr->second.second.size();
 		file.write(reinterpret_cast<char *>(&size), sizeof(size));
 		string tmp = itr->second.second;
+		if (tmp == "fuck10")
+		{
+			int ss = 0;
+		}
 		file.write(tmp.c_str(), size + 1);
 	}
 	file.close();

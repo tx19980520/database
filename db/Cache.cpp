@@ -32,6 +32,10 @@ void Cache::Update(pair<int, string> single)// extension Find and Remove
 			this->CacheSpace[single.first] = single.second;
 		}
 		else {// append
+			if (this->CacheSpace.size() > 50)
+			{
+				this->flush();
+			}
 			this->CacheSpace[single.first] = single.second;
 		}
 	}

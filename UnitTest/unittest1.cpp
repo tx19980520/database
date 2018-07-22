@@ -916,7 +916,12 @@ namespace UnitTest
 			}
 			for (int i = 0; i < 101; ++i)
 			{
-				Assert::AreEqual(db->FindOne(i).second, "fuck"+ to_string(i));
+				if (i == 10)
+				{
+					int s = 0;
+				}
+				string t = db->FindOne(i).second;
+				Assert::AreEqual(t, "fuck"+ to_string(i));
 			}
 			DataBase::close(db);
 			DataBase::Dump();
@@ -1056,6 +1061,33 @@ namespace UnitTest
 					db->ModifyOne(keys[f], TestSet[keys[f]]);
 					Assert::AreEqual(db->FindOne(keys[f]).second, TestSet[keys[f]]);
 				}
+			}
+		}
+
+		TEST_METHOD(DB_FINDMANY_TEST)
+		{
+			fstream vv("C:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
+			vv.close();
+			fstream sf("C:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
+			sf.close();
+			fstream sss("C:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
+			sss.close();
+			DataBase::Init();
+			DataBase *db = DataBase::GetDataBaseByName("darling");
+			Assert::AreNotEqual((int)db, NULL);
+			for (int i = 0; i < 2000; i += 5)
+			{
+				db->InsertOne(i, "dark" + to_string(i));
+			}
+			vector<int> test;
+			for (int i = 10; i < 188; i += 5)
+			{
+				test.push_back(i);
+			}
+			vector<pair<int,string> > result = db->FindMany(7, 188);
+			for (int i = 0; i < result.size(); ++i)
+			{
+				Assert::AreEqual(test[i], result[i].first);
 			}
 		}
 
