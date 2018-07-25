@@ -911,7 +911,6 @@ void MiddleNode::NodeWrite(fstream& fs, int pos)
 			 {
 				 parent.keys[KeyPos] = this->data[0].id;
 				 parent.NodeWrite(fs, this->parent);
-				 MiddleNode check(fs, this->parent);
 			 }
 			 fs.seekg(seek);
 		 }
@@ -1026,13 +1025,7 @@ pair<int, int> BplusTree::Remove(int id)
 	//  pos, size
 	if (pos == -1)
 	{
-		MiddleNode ss(fs, node->parent);
-		LeafNode s(fs, node->LeftSibling);
-		LeafNode f(fs, node->RightSibling);
-		LeafNode sc(fs, f.RightSibling);
-
 		return make_pair(-1, -1);
-
 	}
 	pair<int, int> Raw = make_pair(node->data[pos].offset, node->data[pos].length);
 	node->Remove(pos, fs, 0, root);

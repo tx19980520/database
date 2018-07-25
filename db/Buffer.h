@@ -23,6 +23,7 @@ public:
 	void flush();/* flush the data when Size maxmizing */
 	void flush(const string& path);
 	void Remove(int id);
+	string Find(int id);
 	map<int, pair<int,string> >& GetBufferSpace();/*get Buffer for unit test*/
 };
 inline void Buffer::SetFilePath(const string& path)

@@ -58,6 +58,20 @@ void Buffer::Remove(int id)
 	this->BufferSpace.erase(id);
 }
 
+string Buffer::Find(int id)
+{
+	map<int, pair<int, string>>::iterator itr = this->BufferSpace.begin();
+	while (itr != this->BufferSpace.end())
+	{
+		if (itr->first == id)
+		{
+			return itr->second.second;
+		}
+		++itr;
+	}
+	return "";
+}
+
 map<int, pair<int,string> >& Buffer::GetBufferSpace()
 {
 	return this->BufferSpace;

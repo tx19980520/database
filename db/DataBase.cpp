@@ -30,6 +30,7 @@ int DataBase::save()
 {
 	this->BM->Serialize();
 	this->buffer.flush();
+	this->cache.flush();
 	return 1;
 }
 
@@ -95,12 +96,19 @@ pair<int, string> DataBase::FindOne(int id)
 	pair<int, string>result = this->FindOneInCache(id);
 	if (result.second != "")
 		return result;
+	result = make_pair(id, this->buffer.Find(id));
+	if (result.second != "")
+	{
+		cache.Update(result);
+		return result;
+	}
 	int pos = this->FindOneInTree(id);
 	if (pos == -1)
 	{
 		return make_pair(-1, "");
 	}
 	result = this->FindOneInFile(id, pos);
+	this->cache.Update(result);
 	return result;
 }
 
@@ -132,7 +140,7 @@ void DataBase::close(DataBase* db)
 
 void DataBase::FlushCheck(bool force)
 {
-
+	this->save();
 }
 
 void DataBase::Print(pair<int, string> data)
@@ -210,6 +218,19 @@ void DataBase::Init()
 	db.close();
 }
 
+bool DataBase::HasDataBase(const string &dbname)
+{
+	map<string, string>::iterator itr;
+	for (itr = DataBaseManager.begin(); itr != DataBaseManager.end(); ++itr)
+	{
+		if (itr->first == dbname)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void DataBase::DeleteDataBaseByName(const string& dbname)
 {
 	map<string, string>::iterator itr;
@@ -264,10 +285,6 @@ int DataBase::InsertOne(int id, const string &data)
 	return this->index->Insert(id, pos, data.size() + 5);
 }
 
-int DataBase::InsertMany(vector<string>&)
-{
-	return 0;
-}
 
 int DataBase::RemoveOne(int id)
 {
@@ -275,7 +292,7 @@ int DataBase::RemoveOne(int id)
 	pair<int, int>data = this->index->Remove(id);// return the pos
 	if (data.first == -1)
 	{
-		return 1;
+		return -1;
 	}
 	this->BM->Free(data.first, data.second);
 	// refresh buffer and cache
@@ -288,6 +305,10 @@ int DataBase::ModifyOne(int id, const string & data)
 {	
 	LeafNode* node = this->index->_Find(id);
 	int pos = node->Find(id);
+	if (pos == -1)
+	{
+		return -1;
+	}
 	this->BM->Free(node->data[pos].offset, node->data[pos].length);
 	int NewPos = this->BM->Malloc(data.size() + 5);
 	this->index->Modify(node, id, NewPos, data.size() + 5);

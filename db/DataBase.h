@@ -11,18 +11,16 @@
 #include "BplusTree.h"
 class DataBase{
 public:
-	BplusTree * index;
 	static void Print(pair<int, string>);// print a single data
 	static void Print(vector<pair<int, string> >);// print plenty of data
 	static void Dump();// dump the DataBaseManager to db.default
 	static void Init();// read db.default and init the system
-	static map<string, string> DataBaseManager;// store dbpath in memory
+	static bool HasDataBase(const string&);// check whether the db exists;
 	static void DeleteDataBaseByName(const string&);// delete a DataBase
 	static void AddDataBase(const string&, const string&);// add a DataBase
 	static DataBase* GetDataBaseByName(const string&);/* static function to realize the multiton*/
 	static void close(DataBase*);/* close whole DB */
 	int InsertOne(int, const string&); /* insert one data */
-	int InsertMany(vector<string>&); /* insert many data */
 	int RemoveOne(int);/* delete by key */
 	int ModifyOne(int, const string&); /* modify a data by primary key */
 	pair<int, string> FindOne(int);/* find a data by primary key */
@@ -33,6 +31,10 @@ private:
 	DataBase(const string& name, const string& path);
 	/* DB delete */
 	~DataBase();
+	/* B+ tree */
+	BplusTree * index;
+	/* store dbpath in memory */
+	static map<string, string> DataBaseManager;
 	/* buffer controls the modify and insert added */
 	Buffer buffer;
 	/* cache stores the find and is updated by DB and buffer */
