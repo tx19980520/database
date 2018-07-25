@@ -21,8 +21,10 @@ public:
 		int vec_pos;
 		MiddleNode(int s, int p, int v) :size(s), pos(p), vec_pos(v) {};
 	};
-	void Free(int pos, int size);/* Free a space and add the space into manager*/
-	int Malloc(int size);/* malloc space from manager */
+	/* Free a space and add the space into manager*/
+	void Free(int pos, int size);
+	/* malloc space from manager */
+	int Malloc(int size);
 	BuddyManager() = default;
 	BuddyManager(string path) :BMpath(path) {
 		tail = 0;
@@ -34,7 +36,8 @@ public:
 			vector<int>empty; 
 			manager.push_back(make_pair(1, empty));
 		}
-		else {
+		else 
+		{
 			this->Deserialize();
 		}
 	};
@@ -43,15 +46,24 @@ public:
 	void Deserialize() { deserialize(); }
 	vector<pair<int, vector<int> > >& GetManager() { return manager; };
 private:
-	int tail;/* record the tail of the file */
-	string BMpath;/* Record the BM filepath */
-	vector<pair<int, vector<int> > > manager;/* core structure of BuddyManger */
-	vector<int> DecToBin(int size);/* an auxiliary function used to convert decimal to binary */
-	vector<MiddleNode> Slice(vector<int>slices,int pos);/*  */
-	int malloc(int size);/* An auxiliary function used to segment space */
-	void insert(int pos, int size);/* private insert, which is a recursive function */
-	void split(int pos, int size);/* split a large space for use */
-	void serialize();/* To storage the BuddyManager */
-	void deserialize();/* To init the BuddyManager */
+	/* record the tail of the file */
+	int tail;
+	/* Record the BM filepath */
+	string BMpath;
+	/* core structure of BuddyManger */
+	vector<pair<int, vector<int> > > manager;
+	/* an auxiliary function used to convert decimal to binary */
+	vector<int> DecToBin(int size);
+	vector<MiddleNode> Slice(vector<int>slices,int pos);
+	/* An auxiliary function used to segment space */
+	int malloc(int size);
+	/* private insert, which is a recursive function */
+	void insert(int pos, int size);
+	/* split a large space for use */
+	void split(int pos, int size);
+	/* To storage the BuddyManager */
+	void serialize();
+	/* To init the BuddyManager */
+	void deserialize();
 };
 #endif

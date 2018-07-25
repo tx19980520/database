@@ -17,25 +17,30 @@ pair<int, string> Cache::Find(int id)
 	{
 		return *result;
 	}
-	else {
+	else 
+	{
 		return make_pair(0, "");// tell the db cache has missed;
 	}
 }
 /* premature optimization is the root of all evil */
 
-void Cache::Update(pair<int, string> single)// extension Find and Remove
+/* extension Find and Remove */
+void Cache::Update(pair<int, string> single)
 {
 	if (single.second == "")
 	{
 		this->CacheSpace.erase(single.first);
 	}
-	else {
+	else 
+	{
 		map<int, string>::iterator tmp = this->CacheSpace.find(single.first);
-		if (tmp != this->CacheSpace.end())// modify, Remove effect does not enter buffer
+		/* modify, Remove effect does not enter buffer */
+		if (tmp != this->CacheSpace.end())
 		{
 			this->CacheSpace[single.first] = single.second;
 		}
-		else {// append
+		else 
+		{/* append */
 			if ((int)(this->CacheSpace.size()) > BufferSize)
 			{
 				this->flush();

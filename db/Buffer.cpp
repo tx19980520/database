@@ -1,9 +1,9 @@
 #include "Buffer.h"
+#include "constant.h"
 #include <fstream>
 #include <iostream>
 #include <map>
 #include "string.h"
-#include "constant.h"
 
 using namespace std;
 

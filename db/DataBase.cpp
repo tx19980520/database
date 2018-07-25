@@ -1,11 +1,11 @@
+#include "DataBase.h"
+#include "BplusTree.h"
+#include "constant.h"
 #include <iostream>
 #include <fstream>
 #include<algorithm>
 #include <direct.h>
 #include <cstdio>
-#include "DataBase.h"
-#include "BplusTree.h"
-#include "constant.h"
 using namespace std;
 bool judge(const pair<int, string> a, const pair<int, string> b) {
 	return a.first<b.first;
@@ -53,7 +53,8 @@ pair<vector<pair<int, string> >, vector<int> > DataBase::FindManyInCache(vector<
 		{
 			rest.push_back(IdArray[i]);
 		}
-		else {
+		else 
+		{
 			Found.push_back(tmp);
 		}
 	}
@@ -116,7 +117,7 @@ vector<pair<int, string>> DataBase::FindMany(int low, int high)
 {
 	this->buffer.flush();
 	vector<pair<int, int> > offsets = this->index->FindMany(low, high);
-	// first find in the cache
+	/* first find in the cache */
 	vector<pair<int, string> >result;
 	int s = offsets.size();
 	if (s == 0)
@@ -125,7 +126,7 @@ vector<pair<int, string>> DataBase::FindMany(int low, int high)
 		return result;
 	}
 	vector<pair<int, string> >FileResult;
-	// If offsets is empty the FileResult is empty
+	/* If offsets is empty the FileResult is empty */
 	FileResult = this->FindManyInFile(offsets);
 	result.insert(result.begin(), FileResult.begin(), FileResult.end());
 	sort(result.begin(), result.end(), judge);
@@ -179,6 +180,7 @@ void DataBase::Dump()
 
 void DataBase::Init()
 {
+	/* parse */
 	fstream db("C:\\Users\\ty020\\Desktop\\db\\database\\db\\Release\\db.default", ios::in | ios::out);
 	db.seekg(0, db.end);
 	int length = db.tellg();
@@ -202,7 +204,8 @@ void DataBase::Init()
 				key += str[pos];
 				pos++;
 			}
-			else {
+			else 
+			{
 				pos++;
 				break;
 			}
@@ -278,8 +281,9 @@ DataBase * DataBase::GetDataBaseByName(const string &dbname)
 
 int DataBase::InsertOne(int id, const string &data)
 {
-	int pos = this->BM->Malloc(data.size() + 5);// add int + '/0'
-	// refresh the buffer and cache
+	/* add int + '/0' */
+	int pos = this->BM->Malloc(data.size() + 5);
+	/* refresh the buffer and cache */
 	buffer.Insert(id, pos, data);
 	cache.Update(make_pair(id, data));
 	return this->index->Insert(id, pos, data.size() + 5);
@@ -288,14 +292,15 @@ int DataBase::InsertOne(int id, const string &data)
 
 int DataBase::RemoveOne(int id)
 {
-	//   pos, size
-	pair<int, int>data = this->index->Remove(id);// return the pos
+	/*   pos, size */
+	pair<int, int>data = this->index->Remove(id);
+	/* return the pos */
 	if (data.first == -1)
 	{
 		return -1;
 	}
 	this->BM->Free(data.first, data.second);
-	// refresh buffer and cache
+	/* refresh buffer and cache */
 	this->buffer.Remove(id);
 	this->cache.Update(make_pair(id, ""));
 	return 1;

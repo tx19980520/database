@@ -11,11 +11,15 @@ The core structure is  a map<int, string>
 ************************/
 class Cache {
 private:
-	map<int, string> CacheSpace;/* store the data */
+	/* store the data */
+	map<int, string> CacheSpace;
 public:
-	int GetCacheSize()const;
-	pair<int, string> Find(int);/* Firstly query a data in cache */
-	void Update(pair<int, string>);/* The data entering the buffer must be refresh in Cache */ 
-	void flush();/* clear the cache */
+	int GetCacheSize() const;
+	/* find a data in cache */
+	pair<int, string> Find(int);
+	/* The data entering the buffer must be refresh in Cache */
+	void Update(pair<int, string>);
+	/* clear the cache */
+	void flush();
 };
 #endif

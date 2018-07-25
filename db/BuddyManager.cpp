@@ -1,7 +1,8 @@
+#include "BuddyManager.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "BuddyManager.h"
+
 
 using namespace std;
 
@@ -31,7 +32,8 @@ vector<BuddyManager::MiddleNode> BuddyManager::Slice(vector<int> slices, int pos
 			pos += m;
 			m *= 2;
 		}
-		else {
+		else 
+		{
 			m *= 2;
 		}
 	}
@@ -73,25 +75,26 @@ int BuddyManager::malloc(int size)
 			}
 		}
 	}
-	vector<int>& specific = this->manager[count].second;// storage address
-	if (specific.size() != 0)//has suitable size;
+	vector<int>& specific = this->manager[count].second;/* storage address */
+	if (specific.size() != 0)/* has suitable size */
 	{
 		int pos = specific[0];
 		specific.erase(specific.begin());
-		if (size <= OverSize)// e.g. need 63 give b4
+		if (size <= OverSize)
 		{
 			if (size < OverSize)
 			{
-				split(pos+size, OverSize - size);// split the rest space
+				split(pos+size, OverSize - size);/* split the rest space */
 			}
 			return pos;
 		}
 	}
-	else {// the most specific space has nothing rest
+	else 
+	{/* the most specific space has nothing rest */
 		while (true)
 		{
 			count++;
-			if (count == manager.size())// have no rest space to reuse
+			if (count == manager.size())/* have no rest space to reuse */
 			{
 				int pos = tail;
 				tail += size;
@@ -117,7 +120,7 @@ void BuddyManager::insert(int pos, int size)
 	
 	/* expand the top of manager */
 	int index = spaces.size() - 1;
-	int OriginIndex = manager.size() - 1;// OriginIndex >= 0
+	int OriginIndex = manager.size() - 1;/* OriginIndex >= 0 */
 	if (index > OriginIndex)//
 	{
 		int NowMax = manager[OriginIndex].first;
@@ -137,7 +140,7 @@ void BuddyManager::insert(int pos, int size)
 	for (int i = 0; i < SliceSize; ++i)
 	{
 		MiddleNode &node = slices[i];
-		vector<int>& specific = manager[node.vec_pos].second;// storage the address
+		vector<int>& specific = manager[node.vec_pos].second;/* storage the address */
 		int &space = manager[slices[i].vec_pos].first;
 		int SpecificSize = specific.size();
 		if (SpecificSize != 0 && specific[0] > node.pos)
@@ -151,11 +154,11 @@ void BuddyManager::insert(int pos, int size)
 			specific.insert(specific.begin(), node.pos);
 			continue;
 		}
-		for (int i = 0; i < SpecificSize; ++i)// now O(n)
+		for (int i = 0; i < SpecificSize; ++i)/* now O(n) */
 		{
 			if (specific[i] < node.pos)
 			{
-				//check buddy
+				/* check buddy */
 				int SpecificSize = specific.size();
 				if (specific[i] == node.pos - space)
 				{
@@ -169,18 +172,22 @@ void BuddyManager::insert(int pos, int size)
 					insert(node.pos, size * 2);
 					break;
 				}
-				else {
+				else 
+				{
 					specific.insert(specific.begin() + i, node.pos);
 					break;
 				}
 			}
-			else {
+			else 
+			{
 				continue;
 			}
 		}
-		// the vector is empty
-		if(SpecificSize == 0)
-		specific.insert(specific.begin(), node.pos);
+		/* the vector is empty */
+		if (SpecificSize == 0)
+		{
+			specific.insert(specific.begin(), node.pos);
+		}
 	}
 }
 
@@ -255,12 +262,13 @@ void BuddyManager::deserialize()
 		{
 			SmallBuffer += contents[pos];
 		}
-		else {
-			if (contents[pos] == '!')// end
+		else 
+		{
+			if (contents[pos] == '!')/* end */
 			{
 				break;
 			}
-			if (contents[pos] == '%')// buffer is size
+			if (contents[pos] == '%')/* buffer is size */
 			{
 				vector<int> empty;
 				stringstream steam(SmallBuffer);
@@ -269,22 +277,20 @@ void BuddyManager::deserialize()
 				manager.push_back(make_pair(num, empty));
 				Current = &manager[manager.size() - 1].second;
 			}
-			if (contents[pos] == '*')// buffer is specific pos
+			if (contents[pos] == '*')/* buffer is specific pos */
 			{
 				stringstream steam(SmallBuffer);
 				int num;
 				steam >> num;
 				Current->push_back(num);
 			}
-			if (contents[pos] == '&')// buffer is tail
+			if (contents[pos] == '&')/* buffer is tail */
 			{
 				stringstream steam(SmallBuffer);
 				steam >> tail;
-			}
-			
+			}	
 			SmallBuffer = "";
 		}
 		pos++;
 	}
-	
 }

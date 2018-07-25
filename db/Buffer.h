@@ -15,16 +15,21 @@ class Buffer {
 private:
 	string filepath;
 	map<int, pair<int,string>> BufferSpace;
-	void Wrtite(const string& dbname);/* public interface for write through */
+	/* public interface for write through */
+	void Wrtite(const string& dbname);
 public:
 	void SetFilePath(const string& filepath);
-	int GetBufferSize()const;/* monitor the size of buffer */
-	void Insert(int index, int pointer, const string& str);/* insert a data in buffer */
-	void flush();/* flush the data when Size maxmizing */
+	/* monitor the size of buffer */
+	int GetBufferSize()const;
+	/* insert a data in buffer */
+	void Insert(int index, int pointer, const string& str);
+	/* flush the data when Size maxmizing */
+	void flush();
 	void flush(const string& path);
 	void Remove(int id);
 	string Find(int id);
-	map<int, pair<int,string> >& GetBufferSpace();/*get Buffer for unit test*/
+	/*get Buffer for unit test*/
+	map<int, pair<int,string> >& GetBufferSpace();
 };
 inline void Buffer::SetFilePath(const string& path)
 {
