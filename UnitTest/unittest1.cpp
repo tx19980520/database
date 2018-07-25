@@ -20,6 +20,8 @@
 #include "../db/BplusTree.cpp"
 #include "../db/DataBase.h"
 #include "../db/DataBase.cpp"
+#include "../db/constant.h"
+#include "../db/constant.cpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -535,24 +537,21 @@ namespace UnitTest
 				tree.Insert(i + 1, 0, 0);
 			}
 			// two leafNode and a MiddleNode
-			LeafNode ss(fs, 32768);
-			MiddleNode root(fs, 33792);
 			LeafNode *t = tree._Find(1256);
 			fs.flush();
-			Assert::AreEqual(tree.GetRoot(), 33792);
-			Assert::AreEqual(t->GetSize(), 26);
+			Assert::AreEqual(tree.GetRoot(), 1536);
+			Assert::AreEqual(t->GetSize(), 27);
 			delete t;
 			t = tree._Find(1);
-			Assert::AreEqual(t->GetSize(), 20);
+			Assert::AreEqual(t->GetSize(), 21);
 			delete t;
 			t = tree._Find(33);
 			tree.Remove(33);
 			delete t;
-			MiddleNode sroot(fs, 33280);
 			t = tree._Find(33);
 			tree.Remove(35);
 			t = tree._Find(37);
-			Assert::AreEqual(t->GetSize(), 38);
+			Assert::AreEqual(t->GetSize(), 20);
 			fs.close();
 			delete t;
 		}
@@ -565,8 +564,6 @@ namespace UnitTest
 			{
 				tree.Insert(i + 1, 0, 0);
 			}
-			LeafNode *ss = tree._Find(2);
-			delete ss;
 			// two leafNode and a MiddleNode
 			LeafNode *t = tree._Find(33);
 			Assert::AreEqual(t->GetSize(), 21);
@@ -580,7 +577,7 @@ namespace UnitTest
 			LeafNode xx5(fs, 1024);
 			MiddleNode sxv5(fs, 1536);
 			t = tree._Find(37);
-			Assert::AreEqual(t->GetSize(), 39);
+			Assert::AreEqual(t->GetSize(), 20);
 			delete t;
 			fs.close();
 		}
@@ -600,7 +597,7 @@ namespace UnitTest
 			tree.Insert(0, 0, 0);
 			delete t;
 			t = tree._Find(0);
-			Assert::AreEqual(t->GetSize(), 21);
+			Assert::AreEqual(t->GetSize(), 22);
 			tree.Remove(33);
 			tree.Remove(35);
 			delete t;
@@ -670,7 +667,7 @@ namespace UnitTest
 			}
 			fs.close();
 			BplusTree tree("FindSimple.idx");
-			tree.Modify(0, 2, 3);
+			tree.Modify(tree._Find(0),0, 2, 3);
 			LeafNode* leaf= tree._Find(0);
 			Assert::AreEqual(leaf->data[0].offset, 2);
 			Assert::AreEqual(leaf->data[0].length, 3);
@@ -849,18 +846,18 @@ namespace UnitTest
 		TEST_METHOD(DB_ADD)
 		{
 			// fresh db 
-			fstream fs("D:\\DataBase\\mongo\\mongo.idx", ios::out|ios::trunc);
+			fstream fs("D:\\DataBase\\mongo\\mongo.idx", ios::out | ios::trunc);
 			fs.close();
-			fstream sf("D:\\DataBase\\mongo\\BM.txt", ios::out |ios::trunc);
+			fstream sf("D:\\DataBase\\mongo\\BM.txt", ios::out | ios::trunc);
 			sf.close();
-			fstream sss("D:\\DataBase\\mongo\\mongo.dat", ios::out |ios::trunc);
+			fstream sss("D:\\DataBase\\mongo\\mongo.dat", ios::out | ios::trunc);
 			sss.close();
 			DataBase::Init();
 			DataBase* db = NULL;
 			db = DataBase::GetDataBaseByName("mongo");
 			Assert::AreNotEqual((int)db, NULL);
 			db->InsertOne(1, "fuck");
-			pair<int ,string>result = db->FindOne(1);
+			pair<int, string>result = db->FindOne(1);
 			Assert::AreEqual(result.second.c_str(), "fuck");
 			DataBase::Dump();
 			DataBase::close(db);
@@ -883,7 +880,7 @@ namespace UnitTest
 			db->InsertOne(1, "fuck");
 			db->ModifyOne(1, "shit");
 			Assert::AreEqual(db->FindOne(1).second.c_str(), "shit");
-			
+
 		}
 
 		TEST_METHOD(DB_SIMPLE_TEST)
@@ -921,11 +918,11 @@ namespace UnitTest
 					int s = 0;
 				}
 				string t = db->FindOne(i).second;
-				Assert::AreEqual(t, "fuck"+ to_string(i));
+				Assert::AreEqual(t, "fuck" + to_string(i));
 			}
 			DataBase::close(db);
 			DataBase::Dump();
-			
+
 		}
 
 		TEST_METHOD(DB_ANNOYING_TEST)
@@ -943,7 +940,7 @@ namespace UnitTest
 			{
 				db->InsertOne(i, "abcdefg");
 			}
-			
+
 			for (int i = 0; i < 200; ++i)
 			{
 				db->ModifyOne(i, "gfedcba");
@@ -951,7 +948,7 @@ namespace UnitTest
 			for (int i = 0; i < 200; ++i)
 			{
 				string t = db->FindOne(i).second;
-				Assert::AreEqual(t, string()+"gfedcba");
+				Assert::AreEqual(t, string() + "gfedcba");
 			}
 			DataBase::close(db);
 			DataBase::Dump();
@@ -992,10 +989,6 @@ namespace UnitTest
 			fstream _file;
 			_file.open("D:\\DataBase\\testDB\\testDB.idx", ios::in);
 			Assert::AreEqual(_file.fail(), false);
-			int root;
-			_file.read(reinterpret_cast<char *>(&root), sizeof(root));
-			Assert::AreEqual(root, 512);// root init 
-			_file.close();
 			DataBase::DeleteDataBaseByName("testDB");
 			_file.open("D:\\DataBase\\testDB\\testDB.idx", ios::in);
 			Assert::AreEqual(_file.fail(), true);
@@ -1018,14 +1011,14 @@ namespace UnitTest
 			vector<int> keys;
 			vector<int>Re;
 			set<int> hadInsert;
-			for (int i = 0; i < 1000000; i+=5)
+			for (int i = 0; i < 1000000; i += 5)
 			{
 				TestSet[i] = "fuck" + to_string(i);
 				keys.push_back(i);
 				db->InsertOne(i, "fuck" + to_string(i));
 			}
-			
-			for (int i = 0; i < 1000000; ++i)
+
+			for (int i = 0; i < 100000; ++i)
 			{
 				srand((unsigned)time(NULL));
 				int f = rand() % (int)keys.size();
@@ -1084,12 +1077,81 @@ namespace UnitTest
 			{
 				test.push_back(i);
 			}
-			vector<pair<int,string> > result = db->FindMany(7, 188);
+			vector<pair<int, string> > result = db->FindMany(7, 188);
 			for (int i = 0; i < result.size(); ++i)
 			{
 				Assert::AreEqual(test[i], result[i].first);
 			}
+			test.clear();
+			result.clear();
+			result = db->FindMany(20000, 21000);
+			Assert::AreEqual((int)result.size(), 0);
 		}
+		TEST_METHOD(DB_STORAGE_TEST)
+		{
+			fstream vv("C:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
+			vv.close();
+			fstream sf("C:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
+			sf.close();
+			fstream sss("C:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
+			sss.close();
+			DataBase::Init();
+			DataBase *db = DataBase::GetDataBaseByName("darling");
+			Assert::AreNotEqual((int)db, NULL);
+			for (int i = 0; i < 2000; ++i)
+			{
+				db->InsertOne(i, "bil");
+			}
+			for (int i = 0; i < 2000; ++i)
+			{
+				db->RemoveOne(i);
+			}
+			for (int i = 0; i < 2000; ++i)
+			{
+				db->InsertOne(i, "min");
+			}
+			Assert::AreEqual(1, 1);
+		}
+
+		/*TEST_METHOD(SPEED_TEST)
+		{
+			fstream vv("C:\\DataBase\\darling\\darling.idx", ios::out | ios::trunc);
+			vv.close();
+			fstream sf("C:\\DataBase\\darling\\BM.txt", ios::out | ios::trunc);
+			sf.close();
+			fstream sss("C:\\DataBase\\darling\\darling.dat", ios::out | ios::trunc);
+			sss.close();
+			DataBase::Init();
+			DataBase *db = DataBase::GetDataBaseByName("darling");
+			Assert::AreNotEqual((int)db, NULL);
+
+			clock_t start, end;
+			start = clock();
+			for (int i = 0; i < 1000000; i += 5)
+			{
+				db->InsertOne(i, "fuck" + to_string(i));
+			}
+			end = clock();
+			DataBase::close(db);
+			double result1 = (double)(end - start);
+			fstream dd("D:\\DataBase\\mongo\\mongo.idx", ios::out | ios::trunc);
+			dd.close();
+			fstream ds("D:\\DataBase\\mongo\\BM.txt", ios::out | ios::trunc);
+			ds.close();
+			fstream dds("D:\\DataBase\\mongo\\mongo.dat", ios::out | ios::trunc);
+			dds.close();
+			db = DataBase::GetDataBaseByName("mongo");
+			start = clock();
+			for (int i = 0; i < 1000000; i += 5)
+			{
+				db->InsertOne(i, "fuck" + to_string(i));
+			}
+			end = clock();
+			double result2 = (double)(end - start);
+			cout << "result1:" << result1 << endl;
+			cout << "result2:" << result2 << endl;
+		}
+		*/
 
 
 	};

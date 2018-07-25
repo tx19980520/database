@@ -151,6 +151,7 @@
     <ClInclude Include="BuddyManager.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Cache.h" />
+    <ClInclude Include="constant.h" />
     <ClInclude Include="DataBase.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="BuddyManager.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Cache.cpp" />
+    <ClCompile Include="constant.cpp" />
     <ClCompile Include="DataBase.cpp" />
     <ClCompile Include="db.cpp" />
     <ClCompile Include="stdafx.cpp">

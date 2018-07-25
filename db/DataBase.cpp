@@ -5,8 +5,8 @@
 #include <cstdio>
 #include "DataBase.h"
 #include "BplusTree.h"
+#include "constant.h"
 using namespace std;
-
 bool judge(const pair<int, string> a, const pair<int, string> b) {
 	return a.first<b.first;
 }
@@ -17,7 +17,6 @@ DataBase::DataBase(const string& name, const string& path)
 	BM = new BuddyManager(dbpath + "\\" + dbname + "\\BM.txt");
 	index = new BplusTree(dbpath + "\\" + dbname + "\\" + dbname + ".idx");
 	buffer.SetFilePath(dbpath + "\\" + dbname + "\\" + dbname + ".dat");
-	int i = index->GetRoot();
 }
 
 DataBase::~DataBase()
@@ -107,23 +106,19 @@ pair<int, string> DataBase::FindOne(int id)
 
 vector<pair<int, string>> DataBase::FindMany(int low, int high)
 {
+	this->buffer.flush();
 	vector<pair<int, int> > offsets = this->index->FindMany(low, high);
 	// first find in the cache
 	vector<pair<int, string> >result;
-	vector<pair<int, int>>infile;
-	for (int i = 0; i < offsets.size(); ++i)
+	int s = offsets.size();
+	if (s == 0)
 	{
-		pair<int, string>slice = this->cache.Find(offsets[i].first);
-		if (slice.second != "")
-		{
-			result.push_back(slice);
-		}
-		else {
-			infile.push_back(offsets[i]);
-		}
+		result.clear();
+		return result;
 	}
 	vector<pair<int, string> >FileResult;
-	FileResult = this->FindManyInFile(infile);
+	// If offsets is empty the FileResult is empty
+	FileResult = this->FindManyInFile(offsets);
 	result.insert(result.begin(), FileResult.begin(), FileResult.end());
 	sort(result.begin(), result.end(), judge);
 	return result;
@@ -149,8 +144,8 @@ void DataBase::Print(pair<int, string> data)
 
 void DataBase::Print(vector<pair<int, string> > data)
 {
-	cout << "   key          value";
-	cout << "-------------------------";
+	cout << "   key          value" << endl;
+	cout << "-------------------------" << endl;
 	int len = data.size();
 	for (int i = 0; i < len; ++i)
 	{
@@ -159,7 +154,7 @@ void DataBase::Print(vector<pair<int, string> > data)
 }
 void DataBase::Dump()
 {
-	fstream db("db.default", ios::trunc | ios::out);
+	fstream db("C:\\Users\\ty020\\Desktop\\db\\database\\db\\Release\\db.default", ios::in | ios::trunc | ios::out);
 	int len = DataBaseManager.size();
 	string str;
 	map<string, string>::iterator itr;
@@ -242,14 +237,6 @@ void DataBase::AddDataBase(const string & dbname, const string& dbpath)
 	fstream dat(dbpath + "\\"+ dbname +"\\"+dbname+".dat", ios::out);
 	dat.close();
 	fstream idx(dbpath + "\\" + dbname + "\\" + dbname + ".idx", ios::out);
-	int tmp = 0;
-	for (int i = 0; i < 512; ++i)
-	{
-		idx.write(reinterpret_cast<char *>(&tmp), sizeof(tmp));
-	}
-	idx.seekp(0);
-	int head = 512;
-	idx.write(reinterpret_cast<char *>(&head), sizeof(head));
 	idx.close();
 	fstream BM(dbpath + "\\" + dbname + "\\BM.txt", ios::out);
 	BM.close();
@@ -303,7 +290,7 @@ int DataBase::ModifyOne(int id, const string & data)
 	int pos = node->Find(id);
 	this->BM->Free(node->data[pos].offset, node->data[pos].length);
 	int NewPos = this->BM->Malloc(data.size() + 5);
-	this->index->Modify(id, NewPos, data.size() + 5);
+	this->index->Modify(node, id, NewPos, data.size() + 5);
 	cache.Update(make_pair(id, data));
 	buffer.Insert(id, NewPos, data);
 	return 1;

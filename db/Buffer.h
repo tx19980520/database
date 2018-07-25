@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include "constant.h"
 using namespace std;
 /* premature optimization is the root of all evil */
 /************************

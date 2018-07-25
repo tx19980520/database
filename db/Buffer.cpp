@@ -3,11 +3,9 @@
 #include <iostream>
 #include <map>
 #include "string.h"
+#include "constant.h"
 
 using namespace std;
-/*##############constant statement and definition################*/
-const int BUFFER_SIZE = 50;
-/*##############constant statement and definition################*/
 
 void Buffer::Wrtite(const string & filepath)
 {
@@ -24,10 +22,6 @@ void Buffer::Wrtite(const string & filepath)
 		int size = itr->second.second.size();
 		file.write(reinterpret_cast<char *>(&size), sizeof(size));
 		string tmp = itr->second.second;
-		if (tmp == "fuck10")
-		{
-			int ss = 0;
-		}
 		file.write(tmp.c_str(), size + 1);
 	}
 	file.close();
@@ -41,7 +35,7 @@ int Buffer::GetBufferSize() const
 void Buffer::Insert(int index, int pointer, const string & str)// just add
 {
 	this->BufferSpace[index] = make_pair(pointer,str);
-	if (this->BufferSpace.size() > BUFFER_SIZE)
+	if (this->BufferSpace.size() > BufferSize)
 	{
 		this->flush();
 	}

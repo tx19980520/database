@@ -8,6 +8,10 @@ int Cache::GetCacheSize() const
 }
 pair<int, string> Cache::Find(int id)
 {
+	if (this->CacheSpace.size() == 0)
+	{
+		return make_pair(0, "");
+	}
 	map<int, string>::iterator result = this->CacheSpace.find(id);
 	if (result != this->CacheSpace.end())
 	{
@@ -32,7 +36,7 @@ void Cache::Update(pair<int, string> single)// extension Find and Remove
 			this->CacheSpace[single.first] = single.second;
 		}
 		else {// append
-			if (this->CacheSpace.size() > 50)
+			if ((int)(this->CacheSpace.size()) > BufferSize)
 			{
 				this->flush();
 			}

@@ -9,21 +9,16 @@
 #include "Buffer.h"
 #include "BuddyManager.h"
 #include "BplusTree.h"
-/* BUFFER_LIMIT_SIZE is the upper bound to deal with it and clear it */
-#define BUFFER_LIMIT_SIZE 30;
-/* CACHE_LIMIT_SIZE is the upper bound to deal with it and clear it */
-#define CACHE_LIMIT_SIZE 30;
 class DataBase{
 public:
 	BplusTree * index;
-	/* save the current state to the file */
-	static void Print(pair<int, string>);
-	static void Print(vector<pair<int, string> >);
-	static void Dump();
-	static void Init();
-	static map<string, string> DataBaseManager;
-	static void DeleteDataBaseByName(const string&);
-	static void AddDataBase(const string&, const string&);
+	static void Print(pair<int, string>);// print a single data
+	static void Print(vector<pair<int, string> >);// print plenty of data
+	static void Dump();// dump the DataBaseManager to db.default
+	static void Init();// read db.default and init the system
+	static map<string, string> DataBaseManager;// store dbpath in memory
+	static void DeleteDataBaseByName(const string&);// delete a DataBase
+	static void AddDataBase(const string&, const string&);// add a DataBase
 	static DataBase* GetDataBaseByName(const string&);/* static function to realize the multiton*/
 	static void close(DataBase*);/* close whole DB */
 	int InsertOne(int, const string&); /* insert one data */
@@ -31,7 +26,7 @@ public:
 	int RemoveOne(int);/* delete by key */
 	int ModifyOne(int, const string&); /* modify a data by primary key */
 	pair<int, string> FindOne(int);/* find a data by primary key */
-	vector<pair<int, string>> FindMany(int low, int high);/* find data by the rule of string */
+	vector<pair<int, string> > FindMany(int low, int high);/* find data by the rule of string */
 	void FlushCheck(bool force = false);/* check both buffer and cache flush */
 private:
 	/* DB init */
@@ -57,16 +52,6 @@ private:
 	int FindOneInTree(int a);/* find pointer in B+ */
 	pair<int, string> FindOneInCache(int);/* find data in cache */
 	pair<int, string> FindOneInFile(int, int);/* open the file */
-	/*   FIND END   */
-
-	/*   MODIFY START   */
-	/*   MODIFY END   */
-
-	/*   REMOVE START   */
-	/*   REMOVE END   */
-
-	/*   ADD START   */
-	/*   ADD END   */
 
 
 };

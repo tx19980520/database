@@ -4,12 +4,11 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "constant.h"
 using namespace std;
 
 /*##############constant statement and definition################*/
 enum NODE_TYPE {MIDDLE, LEAF};
-const int M = 61;
-const int L = 40;
 /*##############constant statement and definition################*/
 
 
@@ -103,6 +102,7 @@ private:
 public:
 	vector<LeafData> data;
 	NODE_TYPE GetType() { return this->type; };
+	void TestWrite(fstream& fs, int pos) { NodeWrite(fs, pos); }
 	~LeafNode() {};
 	LeafNode(fstream& fs, int pos);
 	LeafNode(vector<LeafData>, int pointer, int parent, int lb, int rb);
@@ -140,7 +140,7 @@ public:
 	LeafNode * _Find(int);/* Find a node by id */
 	int Insert(int id, int index, int size);/* insert a node */
 	pair<int, int> Remove(int id);/* delete a node */
-	void Modify(int, int, int);
+	void Modify(LeafNode*, int, int, int);
 	string Bpath;
 	int GetRoot() { return root; }
 
