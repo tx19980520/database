@@ -3,6 +3,7 @@
 #define _BUDDYMANAGER_H
 #include <string>
 #include <vector>
+#include <fstream>
 #include <stack>
 using namespace std;
 /************************
