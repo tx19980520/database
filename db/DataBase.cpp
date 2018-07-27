@@ -141,7 +141,15 @@ void DataBase::close(DataBase* db)
 
 void DataBase::FlushCheck(bool force)
 {
-	this->save();
+	int result = this->save();
+	if (result == 1)
+	{
+		return;
+	}
+	else 
+	{
+		cout << "save error!";
+	}
 }
 
 void DataBase::Print(pair<int, string> data)

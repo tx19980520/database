@@ -41,7 +41,7 @@ void Cache::Update(pair<int, string> single)
 		}
 		else 
 		{/* append */
-			if ((int)(this->CacheSpace.size()) > BufferSize)
+			if ((int)(this->CacheSpace.size()) > CacheSize)
 			{
 				this->flush();
 			}

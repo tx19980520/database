@@ -1087,6 +1087,8 @@ namespace UnitTest
 			result.clear();
 			result = db->FindMany(20000, 21000);
 			Assert::AreEqual((int)result.size(), 0);
+			DataBase::close(db);
+			DataBase::Dump();
 		}
 		TEST_METHOD(DB_STORAGE_TEST)
 		{
